@@ -369,7 +369,8 @@ var additionalKanikoFlagsMap = map[string][]string{
 	"Dockerfile_test_issue_mz1227_merged_result": {"--predefined-annotations"},
 	"Dockerfile_test_issue_mz1227_squash":        {"--predefined-annotations"},
 	"Dockerfile_test_issue_mz1230":               {"--provenance", "--predefined-annotations", "--index-file=/index/index.json"},
-	"Dockerfile_test_issue_mz1230_no_index":      {"--index-file=/index/index.json"},
+	"Dockerfile_test_issue_mz1230_no_index":      {"--index-file=/tmp/index.json"},
+	"Dockerfile_test_issue_mz1230_no_push_tar":   {"--provenance", "--no-push", "--tar-path=/tmp/image.tar"},
 	"Dockerfile_test_issue_mz1230_tar":           {"--provenance", "--tar-path=/index/image.tar", "--index-file=/index/index.json"},
 	"Dockerfile_test_issue_mz1230_reproducible":  {"--provenance", "--predefined-annotations", "--reproducible"},
 	"Dockerfile_test_issue_mz1230_oci":           {"--provenance", "--image-format=oci", "--predefined-annotations", "--annotation=org.opencontainers.image.revision=override"},
@@ -389,6 +390,9 @@ var expectErr = map[string]int{
 	"Dockerfile_test_issue_mz1160_4": 1,
 	"Dockerfile_test_issue_mz881":    1,
 	"Dockerfile_test_issue_mz1133_2": 1,
+
+	"Dockerfile_test_issue_mz1230_no_index":    1,
+	"Dockerfile_test_issue_mz1230_no_push_tar": 1,
 }
 
 var crossCompileArch = func() string {
@@ -872,7 +876,6 @@ func NewDockerFileBuilder() *DockerFileBuilder {
 		"Dockerfile_test_issue_mz1230":               {},
 		"Dockerfile_test_issue_mz1230_reproducible":  {},
 		"Dockerfile_test_issue_mz1230_oci":           {},
-		"Dockerfile_test_issue_mz1230_no_index":      {},
 		"Dockerfile_test_issue_mz1230_tar":           {},
 	}
 	return &d
@@ -1297,19 +1300,14 @@ var extraDockerRunFlags = map[string]func(contextDir string) []string{
 	},
 	"Dockerfile_test_issue_mz1230_reproducible": gitlabJob,
 	"Dockerfile_test_issue_mz1230_oci":          gitlabJob,
-	"Dockerfile_test_issue_mz1230_no_index": func(_ string) []string {
-		return indexFileMount("Dockerfile_test_issue_mz1230_no_index")
-	},
 	"Dockerfile_test_issue_mz1230_tar": func(_ string) []string {
 		return indexFileMount("Dockerfile_test_issue_mz1230_tar")
 	},
 }
 
-// Whether --index-file must hold the index the tag resolves to, or must not be written.
-var indexFileWritten = map[string]bool{
-	"Dockerfile_test_issue_mz1230":          true,
-	"Dockerfile_test_issue_mz1230_no_index": false,
-	"Dockerfile_test_issue_mz1230_tar":      true,
+var indexFileDockerfiles = map[string]struct{}{
+	"Dockerfile_test_issue_mz1230":     {},
+	"Dockerfile_test_issue_mz1230_tar": {},
 }
 
 func indexFileDir(dockerfile string) string {
